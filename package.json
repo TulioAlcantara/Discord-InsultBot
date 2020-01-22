@@ -1,0 +1,26 @@
+{
+  "name": "insultbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "insultBot.js",
+  "dependencies": {
+    "discord.js": "^11.5.1",
+    "firebase": "^7.7.0",
+    "mongodb": "^3.5.2",
+    "rname": "^0.0.1-security"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TulioAlcantara/Discord-InsultBot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TulioAlcantara/Discord-InsultBot/issues"
+  },
+  "homepage": "https://github.com/TulioAlcantara/Discord-InsultBot#readme"
+}
