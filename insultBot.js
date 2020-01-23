@@ -3,8 +3,9 @@ const config = require("./config.json");
 const discord = require('discord.js');
 const firebase = require("firebase");
 const bot = new discord.Client();
-bot.login(config.botToken);
-firebase.initializeApp(config.firebaseConfig);
+// bot.login(config.botToken); DEBUG
+// firebase.initializeApp(config.firebaseConfig); DEBUG
+bot.login(process.env.BOT_TOKEN);
 const db = firebase.firestore();
 
 // UTILS STRINGS
@@ -18,6 +19,10 @@ const helpTxt = "Oi eu sou o OfensaBot =)" +
 // BOT START    
 bot.once('ready', () => {
     console.log(`Bot ready`);
+});
+
+bot.on('guildCreate', guild => {
+    console.log(`Bot joined channel ${guild.name} com ${guild.memberCount} membros`);
 });
 
 // BOT MESSAGE LISTENER
