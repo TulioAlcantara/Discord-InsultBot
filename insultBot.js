@@ -65,7 +65,7 @@ const firebaseService = {
                     })
                     message.channel.send("InsultoBot inicializado com sucesso neste canal!");
                 }
-                else{
+                else {
                     message.channel.send("Imbecil! Alguém já usou !init");
                 }
             })
@@ -76,33 +76,46 @@ const firebaseService = {
 
     addInsult: function (message) {
         let ref = firebaseService.getReferenceToObect(message);
-        let newInsultValue = message.content.split("!novoinsulto")[1].trim();
+        let newInsultName  = message.content.split("!novoinsulto")[1].trim();
 
-        if (newInsultValue) {
-            if(newInsultValue.length > 200){
+        if (newInsultName) {
+            if (newInsultName.length > 200) {
                 message.reply("Insulto não pode exceder 200 caracteres!");
                 return;
             }
 
             ref.get()
-                .then((doc) =>{
-                    if(!doc.exists){
+                .then((doc) => {
+                    if (!doc.exists) {
                         message.reply("Digite !init antes de adicionar algum insulto");
                         return;
                     }
-                    else{
-                        let newInsultKey = `insults.${newInsultValue}`;
-                        ref.update({
-                            [newInsultKey]: 0
-                        })
-                            .then(() => {
-                                console.log(`Added insult: '${newInsultValue}'`);
-                                message.channel.send("Insulto cadastrado com sucesso!");
-                            })
-                            .catch((error) => {
-                                console.error("Error adding insult: ", error);
-                            });
+
+                    // CHECK IF INSULT ALREADY EXISTS
+                    let insultArray = Object.entries(doc.data().insults);
+                    for (i = 0; i < insultArray.length; i++) {
+                        console.log(insultArray[i][0] + "//" + newInsultName);
+                        if (insultArray[i][0] == newInsultName) {
+                            message.reply("Esse insulto já foi cadastrado");
+                            return;
+                        }
                     }
+
+                    let newInsultKey = `insults.${newInsultName}`;
+                    ref.update({
+                        [newInsultKey]: 0
+                    })
+                        .then(() => {
+                            console.log(`Added insult: '${newInsultName}'`);
+                            message.channel.send("Insulto cadastrado com sucesso!");
+                        })
+                        .catch((error) => {
+                            console.error("Error adding insult: ", error);
+                        });
+
+                })
+                .catch((error) => {
+                    console.error("Error adding insult: ", error);
                 });
         }
         else {
@@ -118,18 +131,18 @@ const firebaseService = {
                     let docData = doc.data();
                     let insultsArray = Object.keys(docData.insults);
                     let random = Math.floor(Math.random() * insultsArray.length);
-                    message.reply(`${insultsArray[random]}`);
+                    message.reply(`${ insultsArray[random] } `);
                     console.log(`Insult: '${insultsArray[random]}'`);
 
                     //UPDATE INSULT COUNT
                     let insultCurrentCount = docData.insults[insultsArray[random]];
-                    let insultKey = `insults.${insultsArray[random]}`;
+                    let insultKey = `insults.${ insultsArray[random] } `;
                     ref.update({
-                        [insultKey] : insultCurrentCount+1
+                        [insultKey]: insultCurrentCount + 1
                     });
 
                 } else {
-                    message.reply(`Digite !init para incializar o bot`);
+                    message.reply(`Digite!init para incializar o bot`);
                     console.log('No such document!');
                 }
             })
@@ -138,7 +151,7 @@ const firebaseService = {
             });
     },
 
-    listChannelInsults: function(message){
+    listChannelInsults: function (message) {
         let ref = firebaseService.getReferenceToObect(message);
         ref.get()
             .then(doc => {
@@ -147,7 +160,7 @@ const firebaseService = {
                     let insultList = Object.keys(docData.insults).join("\n");
                     message.channel.send(insultList);
                 } else {
-                    message.reply(`Digite !init para incializar o bot`);
+                    message.reply(`Digite!init para incializar o bot`);
                     console.log('No such document!');
                 }
             })
@@ -156,24 +169,35 @@ const firebaseService = {
             });
     },
 
-    listTopInsults: function(message){
-        message.reply("Assim como você, posso ser um merdinha as vezes, essa função ainda não foi implementada =(")
-    //     ref.get()
-    //         .then(doc => {
-    //             if (doc.exists) {
-    //                 let docData = doc.data();
-    //                 let insultList = Object.values(docData.insults).sort().reverse();
-    //                 message.channel.send(insultList);//
-    //                 console.log('Document data:', docData);
+    listTopInsults: function (message) {
+        let ref = firebaseService.getReferenceToObect(message);
+        ref.get()
+            .then(doc => {
+                if (doc.exists) {
+                    let docData = doc.data();
 
-    //             } else {
-    //                 message.reply(`Digite !init para incializar o bot`);
-    //                 console.log('No such document!');
-    //             }
-    //         })
-    //         .catch(error => {
-    //             console.log('Error getting document', error);
-    //         });
+                    //RETURNS AN ARRAY OF ARRAYS WHERE THE INNER ARRAYS CONSISTS OF [INSULT_NAME, INSULT_COUNT] 
+                    let insultArrayDesc = Object.entries(docData.insults).sort(function (a, b) {
+                        return a[1] < b[1] ? 1 : -1;
+                    });
+
+                    let insultListTop3 = "TOP 3 INSULTOS:\n";
+                    for (i = 0; i < 3; i++) {
+                        if (insultArrayDesc[i]) {
+                            insultListTop3 += `${insultArrayDesc[i][0]}: ${insultArrayDesc[i][1]} vezes\n`;
+                        }
+                    }
+                    message.channel.send(insultListTop3);
+
+                } else {
+                    message.reply(`Digite !init para incializar o bot`);
+                    console.log('No such document!');
+                }    
+            })                                            
+            .catch(error => {
+                console.log('Error getting document', error);
+            });
     }
 }
+
 
