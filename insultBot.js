@@ -3,9 +3,24 @@ const config = require("./config.json");
 const discord = require('discord.js');
 const firebase = require("firebase");
 const bot = new discord.Client();
-// bot.login(config.botToken); DEBUG
-// firebase.initializeApp(config.firebaseConfig); DEBUG
+
+// CONFIG LOCAL
+// bot.login(config.botToken);
+
+// CONFIG HEROKU
+const firebaseConfig = {
+    "apiKey": process.env.FIREBASE_APIKEY,
+    "authDomain": process.env.FIREBASE_AUTHDOMAIN,
+    "databaseURL": process.env.FIREBASE_DATABASEURL,
+    "projectId": process.env.FIREBASE_PROJECTID,
+    "storageBucket": process.env.FIREBASE_STORAGEBUCKET,
+    "messagingSenderId": process.env.FIREBASE_MESSAGINGSENDERID,
+    "appId": process.env.FIREBASE_APPID,
+    "measurementId": process.env.FIREBASE_MEASUREMENTID
+}
+firebase.initializeApp(firebaseConfig);
 bot.login(process.env.BOT_TOKEN);
+
 const db = firebase.firestore();
 
 // UTILS STRINGS
@@ -19,7 +34,9 @@ const helpTxt = "Oi eu sou o OfensaBot =)" +
 // BOT START    
 bot.once('ready', () => {
     console.log(`Bot ready`);
+    bot.user.setActivity(`Digite !ajuda`);
 });
+
 
 bot.on('guildCreate', guild => {
     console.log(`Bot joined channel ${guild.name} com ${guild.memberCount} membros`);
@@ -81,7 +98,7 @@ const firebaseService = {
 
     addInsult: function (message) {
         let ref = firebaseService.getReferenceToObect(message);
-        let newInsultName  = message.content.split("!novoinsulto")[1].trim();
+        let newInsultName = message.content.split("!novoinsulto")[1].trim();
 
         if (newInsultName) {
             if (newInsultName.length > 200) {
@@ -94,7 +111,7 @@ const firebaseService = {
                     if (!doc.exists) {
                         message.reply("Digite !init antes de adicionar algum insulto");
                         return;
-                    }
+                    } k
 
                     // CHECK IF INSULT ALREADY EXISTS
                     let insultArray = Object.entries(doc.data().insults);
@@ -136,12 +153,12 @@ const firebaseService = {
                     let docData = doc.data();
                     let insultsArray = Object.keys(docData.insults);
                     let random = Math.floor(Math.random() * insultsArray.length);
-                    message.reply(`${ insultsArray[random] } `);
+                    message.reply(`${insultsArray[random]} `);
                     console.log(`Insult: '${insultsArray[random]}'`);
 
                     //UPDATE INSULT COUNT
                     let insultCurrentCount = docData.insults[insultsArray[random]];
-                    let insultKey = `insults.${ insultsArray[random] } `;
+                    let insultKey = `insults.${insultsArray[random]} `;
                     ref.update({
                         [insultKey]: insultCurrentCount + 1
                     });
@@ -197,8 +214,8 @@ const firebaseService = {
                 } else {
                     message.reply(`Digite !init para incializar o bot`);
                     console.log('No such document!');
-                }    
-            })                                            
+                }
+            })
             .catch(error => {
                 console.log('Error getting document', error);
             });
